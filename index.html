@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>안내서비스 창구</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAE6DB;
+    --card:#FCFBF6;
+    --ink:#1D2B3A;
+    --ink-soft:#5B6675;
+    --line:#D8D2C2;
+    --gov-blue:#1F4E8C;
+    --ring:#C9C2AC;
+
+    --c-민원:#2A5CAA;
+    --c-복지:#2F8558;
+    --c-세금:#B7791F;
+    --c-교통:#6B46C1;
+    --c-재난:#C53030;
+    --c-일자리:#0F8E82;
+    --c-교육:#4C51BF;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, rgba(29,43,58,0.05) 1px, transparent 0) 0 0/16px 16px,
+      var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans KR', sans-serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  /* ===== Header: 대기번호 표시판 컨셉 ===== */
+  header.board{
+    background:var(--ink);
+    color:#F4F1E8;
+    border-radius:10px;
+    padding:28px 32px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 10px 0 rgba(29,43,58,0.08);
+  }
+  header.board::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 26px);
+    pointer-events:none;
+  }
+  .board-top{
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .board-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:0.18em;
+    color:#E7A45A; text-transform:uppercase; margin:0 0 6px;
+  }
+  h1{
+    font-size:28px; margin:0; font-weight:700; letter-spacing:-0.01em;
+  }
+  .board-count{
+    font-family:'IBM Plex Mono', monospace;
+    text-align:right;
+  }
+  .board-count .num{
+    font-size:40px; font-weight:700; color:#F4F1E8; line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .board-count .label{
+    font-size:12px; color:#B9BFC9; margin-top:4px; letter-spacing:0.04em;
+  }
+  .board-sub{
+    margin-top:14px; font-size:13.5px; color:#B9BFC9;
+  }
+
+  /* ===== Controls ===== */
+  .controls{
+    margin-top:20px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+  }
+  .search-row{
+    display:flex; gap:10px; align-items:center;
+    border-bottom:1px dashed var(--line);
+    padding-bottom:16px; margin-bottom:16px;
+  }
+  .search-row svg{flex:none; color:var(--ink-soft);}
+  #search{
+    flex:1; border:none; outline:none; background:transparent;
+    font-family:'IBM Plex Sans KR', sans-serif;
+    font-size:16px; color:var(--ink);
+  }
+  #search::placeholder{color:#9AA2AD;}
+
+  .filter-row{
+    display:flex; flex-wrap:wrap; gap:22px 28px;
+  }
+  .filter-group{display:flex; flex-direction:column; gap:8px;}
+  .filter-group .fg-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.1em; color:var(--ink-soft); text-transform:uppercase;
+  }
+  .chip-set{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Sans KR', sans-serif;
+    font-size:13px;
+    padding:6px 12px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:all .12s ease;
+    user-select:none;
+  }
+  .chip:hover{border-color:var(--ink-soft);}
+  .chip[data-active="true"]{
+    color:#fff; border-color:transparent;
+    background:var(--chip-color, var(--gov-blue));
+  }
+
+  select{
+    font-family:'IBM Plex Sans KR', sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:7px 10px;
+    outline:none;
+    cursor:pointer;
+  }
+  select:focus, #search:focus, .chip:focus-visible, select:focus-visible{
+    box-shadow:0 0 0 3px rgba(31,78,140,0.28);
+    border-radius:4px;
+  }
+
+  /* ===== Result meta ===== */
+  .meta-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin:26px 2px 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; color:var(--ink-soft);
+  }
+  .meta-row button{
+    font-family:'IBM Plex Sans KR', sans-serif;
+    font-size:12.5px;
+    background:none; border:none; color:var(--gov-blue);
+    text-decoration:underline; cursor:pointer; padding:0;
+  }
+
+  /* ===== Ticket grid ===== */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(268px, 1fr));
+    gap:16px;
+  }
+
+  .ticket{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px 18px 16px;
+    position:relative;
+    box-shadow:0 1px 0 rgba(29,43,58,0.04);
+  }
+  .ticket::before{
+    /* perforation notches, left & right */
+    content:"";
+    position:absolute; top:64px; left:-8px;
+    width:16px; height:16px; border-radius:50%;
+    background:var(--paper);
+    border:1px solid var(--line);
+  }
+  .ticket::after{
+    content:"";
+    position:absolute; top:64px; right:-8px;
+    width:16px; height:16px; border-radius:50%;
+    background:var(--paper);
+    border:1px solid var(--line);
+  }
+  .ticket .tear{
+    border-top:1px dashed var(--line);
+    margin:14px -18px 12px;
+  }
+
+  .ticket-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+  }
+  .ticket-id{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; color:var(--ink-soft); letter-spacing:0.06em;
+  }
+  .tag{
+    font-family:'IBM Plex Sans KR', sans-serif;
+    font-size:11px; font-weight:600;
+    padding:3px 9px; border-radius:100px;
+    color:#fff;
+    background:var(--tag-color, var(--gov-blue));
+    white-space:nowrap;
+  }
+
+  .ticket-name{
+    margin:12px 0 0;
+    font-size:16.5px; font-weight:700; line-height:1.4;
+  }
+
+  .ticket-info{
+    display:flex; flex-direction:column; gap:6px;
+    font-size:13px; color:var(--ink-soft);
+  }
+  .ticket-info .row{display:flex; gap:6px; align-items:center;}
+  .ticket-info .row .k{color:#9AA2AD; min-width:44px; font-size:11.5px; font-family:'IBM Plex Mono', monospace;}
+  .ticket-info .row .v{color:var(--ink);}
+
+  .ticket-bottom{
+    display:flex; justify-content:space-between; align-items:center; margin-top:2px;
+  }
+  .call{
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .call .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:19px; font-weight:700; color:var(--ink);
+    letter-spacing:0.01em;
+  }
+  .online-badge{
+    font-size:11px; font-weight:600; padding:3px 8px; border-radius:5px;
+  }
+  .online-badge.ok{ background:#E4F2E9; color:var(--c-복지); }
+  .online-badge.no{ background:#F2E4E4; color:var(--c-재난); }
+
+  /* ===== Empty state ===== */
+  .empty{
+    grid-column:1/-1;
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    background:var(--card);
+    border:1px dashed var(--line);
+    border-radius:10px;
+  }
+  .empty .big{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px; letter-spacing:0.12em; color:#9AA2AD; margin-bottom:6px;
+  }
+  .empty p{margin:4px 0 0; font-size:14px;}
+
+  @media (max-width:520px){
+    h1{font-size:22px;}
+    .board-count .num{font-size:30px;}
+    .board-top{flex-direction:column; align-items:flex-start;}
+    .board-count{text-align:left;}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .ticket{transition:transform .12s ease, box-shadow .12s ease;}
+    .ticket:hover{transform:translateY(-2px); box-shadow:0 6px 14px rgba(29,43,58,0.08);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="board">
+    <div class="board-top">
+      <div>
+        <p class="board-eyebrow">공공 안내서비스 창구</p>
+        <h1>오늘도 안내해 드립니다</h1>
+      </div>
+      <div class="board-count">
+        <div class="num" id="countNum">24</div>
+        <div class="label">건 안내 가능</div>
+      </div>
+    </div>
+    <p class="board-sub">서비스명을 검색하거나 분야 · 기관 · 온라인 안내 여부로 필터링해 보세요.</p>
+  </header>
+
+  <div class="controls">
+    <div class="search-row">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="서비스명으로 검색 (예: 기초연금, 자동차등록...)" autocomplete="off">
+    </div>
+
+    <div class="filter-row">
+      <div class="filter-group">
+        <span class="fg-label">안내분야</span>
+        <div class="chip-set" id="fieldChips"></div>
+      </div>
+
+      <div class="filter-group">
+        <span class="fg-label">소관기관</span>
+        <select id="orgSelect"><option value="전체">전체</option></select>
+      </div>
+
+      <div class="filter-group">
+        <span class="fg-label">온라인안내</span>
+        <select id="onlineSelect">
+          <option value="전체">전체</option>
+          <option value="가능">가능</option>
+          <option value="불가">불가</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta-row">
+    <span id="resultCount">전체 24건 표시 중</span>
+    <button id="resetBtn" type="button">필터 초기화</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+</div>
+
+<script>
+const DATA = [
+  {"서비스ID":"A001","서비스명":"주민등록 발급 안내","안내분야":"민원","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1374"},
+  {"서비스ID":"A002","서비스명":"전입신고 안내","안내분야":"민원","소관기관":"보건복지부","온라인안내":"가능","콜센터":"1352"},
+  {"서비스ID":"A003","서비스명":"인감증명 안내","안내분야":"민원","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1313"},
+  {"서비스ID":"A004","서비스명":"민원접수 안내","안내분야":"민원","소관기관":"교육부","온라인안내":"가능","콜센터":"1341"},
+  {"서비스ID":"A005","서비스명":"정부24 이용 안내","안내분야":"민원","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1356"},
+  {"서비스ID":"A006","서비스명":"기초연금 안내","안내분야":"복지","소관기관":"행정안전부","온라인안내":"불가","콜센터":"1386"},
+  {"서비스ID":"A007","서비스명":"복지급여 안내","안내분야":"복지","소관기관":"고용노동부","온라인안내":"가능","콜센터":"1319"},
+  {"서비스ID":"A008","서비스명":"장애인지원 안내","안내분야":"복지","소관기관":"보건복지부","온라인안내":"가능","콜센터":"1337"},
+  {"서비스ID":"A009","서비스명":"아동수당 안내","안내분야":"복지","소관기관":"지자체","온라인안내":"가능","콜센터":"1326"},
+  {"서비스ID":"A010","서비스명":"지방세 납부 안내","안내분야":"세금","소관기관":"보건복지부","온라인안내":"가능","콜센터":"1357"},
+  {"서비스ID":"A011","서비스명":"취득세 안내","안내분야":"세금","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1341"},
+  {"서비스ID":"A012","서비스명":"재산세 안내","안내분야":"세금","소관기관":"지자체","온라인안내":"가능","콜센터":"1317"},
+  {"서비스ID":"A013","서비스명":"자동차등록 안내","안내분야":"교통","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1399"},
+  {"서비스ID":"A014","서비스명":"운전면허 안내","안내분야":"교통","소관기관":"보건복지부","온라인안내":"불가","콜센터":"1357"},
+  {"서비스ID":"A015","서비스명":"주정차단속 안내","안내분야":"교통","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1367"},
+  {"서비스ID":"A016","서비스명":"재난지원금 안내","안내분야":"재난","소관기관":"행정안전부","온라인안내":"불가","콜센터":"1356"},
+  {"서비스ID":"A017","서비스명":"대피소 안내","안내분야":"재난","소관기관":"국세청","온라인안내":"가능","콜센터":"1359"},
+  {"서비스ID":"A018","서비스명":"안전신고 안내","안내분야":"재난","소관기관":"국세청","온라인안내":"가능","콜센터":"1357"},
+  {"서비스ID":"A019","서비스명":"국민취업지원 안내","안내분야":"일자리","소관기관":"지자체","온라인안내":"가능","콜센터":"1386"},
+  {"서비스ID":"A020","서비스명":"구직급여 안내","안내분야":"일자리","소관기관":"국토교통부","온라인안내":"불가","콜센터":"1350"},
+  {"서비스ID":"A021","서비스명":"청년일자리 안내","안내분야":"일자리","소관기관":"지자체","온라인안내":"가능","콜센터":"1392"},
+  {"서비스ID":"A022","서비스명":"평생교육 안내","안내분야":"교육","소관기관":"국토교통부","온라인안내":"가능","콜센터":"1379"},
+  {"서비스ID":"A023","서비스명":"학자금 안내","안내분야":"교육","소관기관":"지자체","온라인안내":"가능","콜센터":"1324"},
+  {"서비스ID":"A024","서비스명":"교육비지원 안내","안내분야":"교육","소관기관":"행정안전부","온라인안내":"가능","콜센터":"1368"}
+];
+
+const state = { search:"", field:"전체", org:"전체", online:"전체" };
+
+const grid = document.getElementById('grid');
+const fieldChips = document.getElementById('fieldChips');
+const orgSelect = document.getElementById('orgSelect');
+const onlineSelect = document.getElementById('onlineSelect');
+const searchInput = document.getElementById('search');
+const resultCount = document.getElementById('resultCount');
+const countNum = document.getElementById('countNum');
+const resetBtn = document.getElementById('resetBtn');
+
+// build field chip list (전체 + unique fields in stable order)
+const fieldOrder = ["전체", ...[...new Set(DATA.map(d => d.안내분야))]];
+fieldOrder.forEach(f => {
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'chip';
+  chip.textContent = f;
+  chip.dataset.value = f;
+  chip.dataset.active = (f === '전체') ? 'true' : 'false';
+  if (f !== '전체') chip.style.setProperty('--chip-color', `var(--c-${f})`);
+  chip.addEventListener('click', () => {
+    state.field = f;
+    [...fieldChips.children].forEach(c => c.dataset.active = (c.dataset.value === f) ? 'true' : 'false');
+    render();
+  });
+  fieldChips.appendChild(chip);
+});
+
+// build org select
+const orgList = [...new Set(DATA.map(d => d.소관기관))].sort((a,b) => a.localeCompare(b, 'ko'));
+orgList.forEach(o => {
+  const opt = document.createElement('option');
+  opt.value = o; opt.textContent = o;
+  orgSelect.appendChild(opt);
+});
+
+searchInput.addEventListener('input', e => { state.search = e.target.value.trim(); render(); });
+orgSelect.addEventListener('change', e => { state.org = e.target.value; render(); });
+onlineSelect.addEventListener('change', e => { state.online = e.target.value; render(); });
+resetBtn.addEventListener('click', () => {
+  state.search = ''; state.field = '전체'; state.org = '전체'; state.online = '전체';
+  searchInput.value = ''; orgSelect.value = '전체'; onlineSelect.value = '전체';
+  [...fieldChips.children].forEach(c => c.dataset.active = (c.dataset.value === '전체') ? 'true' : 'false');
+  render();
+});
+
+function filterData(){
+  return DATA.filter(d => {
+    if (state.search && !d.서비스명.includes(state.search)) return false;
+    if (state.field !== '전체' && d.안내분야 !== state.field) return false;
+    if (state.org !== '전체' && d.소관기관 !== state.org) return false;
+    if (state.online !== '전체' && d.온라인안내 !== state.online) return false;
+    return true;
+  });
+}
+
+function ticketHTML(d){
+  return `
+    <article class="ticket">
+      <div class="ticket-top">
+        <span class="ticket-id">No. ${d.서비스ID}</span>
+        <span class="tag" style="--tag-color:var(--c-${d.안내분야})">${d.안내분야}</span>
+      </div>
+      <h3 class="ticket-name">${d.서비스명}</h3>
+      <div class="tear"></div>
+      <div class="ticket-info">
+        <div class="row"><span class="k">소관</span><span class="v">${d.소관기관}</span></div>
+      </div>
+      <div class="ticket-bottom">
+        <div class="call">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.36 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span class="num">${d.콜센터}</span>
+        </div>
+        <span class="online-badge ${d.온라인안내 === '가능' ? 'ok' : 'no'}">온라인 ${d.온라인안내}</span>
+      </div>
+    </article>
+  `;
+}
+
+function render(){
+  const filtered = filterData();
+  countNum.textContent = filtered.length;
+  resultCount.textContent = (state.search || state.field !== '전체' || state.org !== '전체' || state.online !== '전체')
+    ? `${filtered.length}건 검색됨 (전체 ${DATA.length}건 중)`
+    : `전체 ${DATA.length}건 표시 중`;
+
+  if (filtered.length === 0){
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="big">NO MATCH · 대기번호 없음</div>
+        <p>조건에 맞는 안내서비스가 없습니다. 검색어나 필터를 조정해 보세요.</p>
+      </div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(ticketHTML).join('');
+}
+
+render();
+</script>
+</body>
+</html>
